@@ -27,6 +27,6 @@ export const verifyToken = async (
 	token: string,
 	secret: string,
 ): Promise<string> => {
-	const payload = await verify(token, secret);
+	const payload = await verify(token, secret, "HS256");
 	return payload.lineUserId as string;
 };

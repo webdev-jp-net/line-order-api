@@ -20,7 +20,8 @@ export const authMiddleware = createMiddleware<Env>(async (c, next) => {
 		const lineUserId = await verifyToken(token, c.env.SESSION_SECRET);
 		c.set("lineUserId", lineUserId);
 		await next();
-	} catch {
+	} catch (err) {
+		console.error("JWT verify failed:", err);
 		return c.json({ message: "Unauthorized" }, 401);
 	}
 });
