@@ -1,0 +1,16 @@
+name = "line-auth-api"
+main = "src/index.ts"
+workers_dev = true
+compatibility_date = "2026-03-05"
+kv_namespaces = [
+  { binding = "KV", id = "1950769f2434475ab3da5f7afa82b183", preview_id = "c0a828c676f442d8ad743a9da296024b" }
+]
+
+# secrets は `wrangler secret put` で設定
+# wrangler secret put LINE_CHANNEL_SECRET
+# wrangler secret put SESSION_SECRET
+
+[vars]
+LINE_CHANNEL_ID = "<YOUR_LINE_CHANNEL_ID>"
+LINE_CALLBACK_URL = "https://line-auth-api.<YOUR_SUBDOMAIN>.workers.dev/auth/callback"
+FRONTEND_URL = "https://<YOUR_LIFF_APP_URL>"

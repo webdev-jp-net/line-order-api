@@ -1,0 +1,21 @@
+{
+	"compilerOptions": {
+		"target": "ES2021",
+		"module": "ESNext",
+		"moduleResolution": "node",
+		"strict": true,
+		"isolatedModules": true,
+		"baseUrl": "./",
+		"paths": {
+			"@handler/*": ["src/handler/*"],
+			"@routes/*": ["src/routes/*"],
+			"@util/*": ["src/util/*"],
+			"@middleware/*": ["src/middleware/*"]
+		},
+		"allowSyntheticDefaultImports": true,
+		"outDir": "./dist",
+		"rootDir": "./src"
+	},
+	"include": ["src/**/*"],
+	"exclude": ["node_modules"]
+}

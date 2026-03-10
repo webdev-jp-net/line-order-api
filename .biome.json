@@ -1,0 +1,16 @@
+{
+	"$schema": "https://raw.githubusercontent.com/biomejs/biome/main/schema.json",
+	"organization": {
+		"files": {
+			"ignore": ["dist", "document", "node_modules"]
+		}
+	},
+	"formatter": {
+		"ignore": ["dist", "document", "node_modules"]
+	},
+	"linter": {
+		"rules": {
+			"recommended": true
+		}
+	}
+}

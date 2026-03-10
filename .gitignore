@@ -1,0 +1,19 @@
+# dependencies
+/node_modules
+
+# TypeScript build output
+dist/
+
+# misc
+.DS_Store
+*.pem
+
+# env files (can opt-in for committing if needed)
+.env*
+!.env.example
+
+# Cloudflare Wrangler temporary files
+.wrangler/
+
+# 開発環境用の設定
+wrangler.dev.toml
