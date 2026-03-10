@@ -1,26 +1,26 @@
 import { createMiddleware } from "hono/factory";
-import { getCookie } from "hono/cookie";
 import type { Env } from "../types";
-import { getSession } from "@util/session";
+import { verifyToken } from "@util/jwt";
 
 /**
  * 認証ミドルウェア
- * Cookie からセッションIDを取得し、KV で検証
+ * Authorization: Bearer <JWT> ヘッダーを検証
  * 成功時は c.set("lineUserId", ...) でユーザーIDをセット
  */
 export const authMiddleware = createMiddleware<Env>(async (c, next) => {
-	const sessionId = getCookie(c, "session_id");
+	const authHeader = c.req.header("Authorization");
 
-	if (!sessionId) {
-		return c.json({ error: "Unauthorized: no session" }, 401);
+	if (!authHeader?.startsWith("Bearer ")) {
+		return c.json({ message: "Unauthorized" }, 401);
 	}
 
-	const session = await getSession(c.env.KV, sessionId);
+	const token = authHeader.slice(7);
 
-	if (!session) {
-		return c.json({ error: "Unauthorized: invalid or expired session" }, 401);
+	try {
+		const lineUserId = await verifyToken(token, c.env.SESSION_SECRET);
+		c.set("lineUserId", lineUserId);
+		await next();
+	} catch {
+		return c.json({ message: "Unauthorized" }, 401);
 	}
-
-	c.set("lineUserId", session.lineUserId);
-	await next();
 });

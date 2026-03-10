@@ -1,24 +1,25 @@
 # LINE Auth API
 
-LINE Login + Cloudflare Workers + KV を使用した認証APIです。
-LINE OAuth 2.1 による認証フローを Cloudflare Workers 上の Hono で処理し、セッションを KV で管理します。
+LIFF + Cloudflare Workers + KV を使用した認証APIです。
+LIFF SDK で取得した LINE ID Token をサーバー側で検証し、JWT を発行して API 認証を行います。
 
 ## 技術スタック
 
 ### インフラ / デプロイ
 - **Cloudflare Workers** - サーバーレス実行環境
-- **Cloudflare KV** - ユーザーデータ・セッションの永続化
+- **Cloudflare KV** - ユーザーデータの永続化
 - **Wrangler** - Cloudflare Workers 公式 CLI
 
 ### Web フレームワーク
-- **Hono** - 軽量・高速な Web フレームワーク
+- **Hono** - 軽量・高速な Web フレームワーク（JWT ヘルパー含む）
 
 ### 言語 / 開発環境
 - **TypeScript** - 静的型付け
 - **Biome** - コードフォーマッタ兼リンター
 
 ### 外部 API
-- **LINE Login v2.1** - OAuth 2.1 認証・IDトークン検証
+- **LINE Login v2.1** - ID Token 検証
+- **LIFF SDK** - LINE ログイン・ID Token 取得
 
 ---
 
@@ -26,22 +27,21 @@ LINE OAuth 2.1 による認証フローを Cloudflare Workers 上の Hono で処
 
 ```mermaid
 sequenceDiagram
-	participant User as ユーザー（LIFF App）
-	participant Worker as Cloudflare Workers（Hono）
+	participant User as LIFF App
+	participant Worker as Cloudflare Workers
 	participant LINE as LINE API
 	participant KV as Cloudflare KV
 
-	User->>Worker: GET /auth/callback?code=xxx
-	Worker->>LINE: POST /oauth2/v2.1/token
-	LINE-->>Worker: access_token + id_token
+	User->>User: liff.init() + liff.getIDToken()
+	User->>Worker: GET /user-token (header: line-id-token)
 	Worker->>LINE: POST /oauth2/v2.1/verify
 	LINE-->>Worker: LINE User ID
 	Worker->>KV: user:{lineUserId} upsert
-	Worker->>KV: session:{uuid} 作成（TTL 7日）
-	Worker-->>User: Set-Cookie + FE にリダイレクト
-	User->>Worker: GET /api/me（Cookie）
-	Worker->>KV: セッション・ユーザー検索
-	Worker-->>User: UserData JSON
+	Worker-->>User: JSON { userToken (JWT), lineUserId }
+	User->>Worker: GET /profile (header: Authorization: Bearer JWT)
+	Worker->>Worker: JWT 検証
+	Worker->>KV: user:{lineUserId} 取得
+	Worker-->>User: JSON UserProfile
 ```
 
 ---
@@ -50,24 +50,23 @@ sequenceDiagram
 
 ```
 src/
-├── index.ts                  # Hono エントリポイント（CORS + ルーティング統合）
+├── index.ts                  # Hono エントリポイント（CORS + ルーティング）
 ├── types.ts                  # 全型定義
 ├── routes/
 │   ├── rootRoute.ts          # GET /
-│   ├── authRoute.ts          # GET /auth/callback, POST /auth/logout
-│   └── apiRoute.ts           # GET /api/me
+│   ├── userTokenRoute.ts     # GET /user-token
+│   └── profileRoute.ts       # GET/PUT /profile
 ├── handler/
 │   ├── rootHandler.ts        # HTML ステータスページ
-│   ├── auth/
-│   │   ├── callbackHandler.ts  # LINE OAuth コールバック
-│   │   └── logoutHandler.ts    # ログアウト
-│   └── api/
-│       └── meHandler.ts        # ユーザー情報取得
+│   ├── userTokenHandler.ts   # LINE ID Token → JWT 発行
+│   └── profile/
+│       ├── getProfileHandler.ts  # プロフィール取得
+│       └── putProfileHandler.ts  # プロフィール登録・更新
 ├── middleware/
-│   └── authMiddleware.ts     # Cookie セッション認証
+│   └── authMiddleware.ts     # Bearer JWT 認証
 └── util/
     ├── lineApi.ts            # LINE API 通信
-    ├── session.ts            # セッション CRUD
+    ├── jwt.ts                # JWT 署名・検証
     └── userStore.ts          # ユーザーデータ CRUD
 ```
 
@@ -78,9 +77,9 @@ src/
 | メソッド | パス | 認証 | 説明 |
 |---|---|---|---|
 | GET | `/` | 不要 | HTML ステータスページ |
-| GET | `/auth/callback` | 不要 | LINE OAuth コールバック |
-| POST | `/auth/logout` | 不要 | ログアウト |
-| GET | `/api/me` | 要 | ユーザー情報取得 |
+| GET | `/user-token` | `line-id-token` ヘッダー | JWT 発行 |
+| GET | `/profile` | Bearer JWT | プロフィール取得 |
+| PUT | `/profile` | Bearer JWT | プロフィール登録・更新 |
 
 ---
 
@@ -96,7 +95,6 @@ npm install
 
 1. [LINE Developers Console](https://developers.line.biz/console/) で LINE Login チャネルを作成
 2. スコープに `profile` と `openid` を有効化
-3. コールバック URL を登録
 
 ### 3. 環境変数の設定
 
@@ -106,7 +104,6 @@ npm install
 [vars]
 LINE_CHANNEL_ID = "あなたのチャネルID"
 LINE_CHANNEL_SECRET = "あなたのチャネルシークレット"
-LINE_CALLBACK_URL = "http://localhost:8787/auth/callback"
 FRONTEND_URL = "http://localhost:3000"
 SESSION_SECRET = "任意の強い文字列"
 ```

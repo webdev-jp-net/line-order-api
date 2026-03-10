@@ -2,8 +2,8 @@ import { Hono } from "hono";
 import { cors } from "hono/cors";
 import type { Env } from "./types";
 import rootRoute from "@routes/rootRoute";
-import authRoute from "@routes/authRoute";
-import apiRoute from "@routes/apiRoute";
+import userTokenRoute from "@routes/userTokenRoute";
+import profileRoute from "@routes/profileRoute";
 
 const app = new Hono<Env>();
 
@@ -15,13 +15,14 @@ app.use(
 			const allowed = c.env.FRONTEND_URL;
 			return origin === allowed ? origin : "";
 		},
-		credentials: true,
+		allowHeaders: ["Content-Type", "Authorization", "line-id-token"],
+		allowMethods: ["GET", "PUT", "POST", "OPTIONS"],
 	}),
 );
 
 // ルートの統合
 app.route("/", rootRoute);
-app.route("/auth", authRoute);
-app.route("/api", apiRoute);
+app.route("/user-token", userTokenRoute);
+app.route("/profile", profileRoute);
 
 export default app;

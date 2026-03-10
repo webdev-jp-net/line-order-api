@@ -3,7 +3,6 @@ export type Bindings = {
 	KV: KVNamespace;
 	LINE_CHANNEL_ID: string;
 	LINE_CHANNEL_SECRET: string;
-	LINE_CALLBACK_URL: string;
 	FRONTEND_URL: string;
 	SESSION_SECRET: string;
 };
@@ -17,16 +16,6 @@ export type Env = {
 };
 
 // LINE API Types
-
-/** POST /oauth2/v2.1/token レスポンス */
-export type LineTokenResponse = {
-	access_token: string;
-	expires_in: number;
-	id_token: string;
-	refresh_token: string;
-	scope: string;
-	token_type: string;
-};
 
 /** POST /oauth2/v2.1/verify (IDトークン検証) レスポンス */
 export type LineIdTokenPayload = {
@@ -42,18 +31,18 @@ export type LineIdTokenPayload = {
 	email?: string;
 };
 
-// KV に保存するユーザーデータ
+// KV に保存するユーザープロフィール
 
-export type UserData = {
+export type UserProfile = {
 	lineUserId: string;
-	createdAt: string;
-	updatedAt: string;
+	gender?: number;
+	ageGroup?: number;
+	residence?: string;
 };
 
-// Session: KV に保存するセッション
+// エラーレスポンス（OpenAPI 仕様準拠）
 
-export type SessionData = {
-	lineUserId: string;
-	createdAt: string;
-	expiresAt: string;
+export type ErrorResponse = {
+	message: string;
+	errorParams?: string[];
 };

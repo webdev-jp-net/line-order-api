@@ -1,39 +1,6 @@
-import type { LineTokenResponse, LineIdTokenPayload } from "../types";
+import type { LineIdTokenPayload } from "../types";
 
-const LINE_TOKEN_URL = "https://api.line.me/oauth2/v2.1/token";
 const LINE_VERIFY_URL = "https://api.line.me/oauth2/v2.1/verify";
-
-/**
- * 認可コードからアクセストークン + IDトークンを取得
- * client_secret はサーバー側のみで使用
- */
-export const issueToken = async (params: {
-	code: string;
-	channelId: string;
-	channelSecret: string;
-	redirectUri: string;
-}): Promise<LineTokenResponse> => {
-	const body = new URLSearchParams({
-		grant_type: "authorization_code",
-		code: params.code,
-		redirect_uri: params.redirectUri,
-		client_id: params.channelId,
-		client_secret: params.channelSecret,
-	});
-
-	const res = await fetch(LINE_TOKEN_URL, {
-		method: "POST",
-		headers: { "Content-Type": "application/x-www-form-urlencoded" },
-		body: body.toString(),
-	});
-
-	if (!res.ok) {
-		const error = await res.text();
-		throw new Error(`LINE token issuance failed: ${res.status} ${error}`);
-	}
-
-	return res.json() as Promise<LineTokenResponse>;
-};
 
 /**
  * IDトークンをLINEサーバーで検証し、ペイロードを取得
