@@ -3,10 +3,8 @@ import { cors } from "hono/cors";
 import type { Env } from "./types";
 import rootRoute from "@routes/rootRoute";
 import userTokenRoute from "@routes/userTokenRoute";
-import profileRoute from "@routes/profileRoute";
-import progressRoute from "@routes/progressRoute";
-import awardsRoute from "@routes/awardsRoute";
-import surveysRoute from "@routes/surveysRoute";
+import orderRoute from "@routes/orderRoute";
+import slackRoute from "@routes/slackRoute";
 
 const app = new Hono<Env>();
 
@@ -19,16 +17,14 @@ app.use(
 			return origin === allowed ? origin : "";
 		},
 		allowHeaders: ["Content-Type", "Authorization", "line-id-token"],
-		allowMethods: ["GET", "PUT", "POST", "OPTIONS"],
+		allowMethods: ["GET", "POST", "OPTIONS"],
 	}),
 );
 
 // ルートの統合
 app.route("/", rootRoute);
 app.route("/user-token", userTokenRoute);
-app.route("/profile", profileRoute);
-app.route("/progress", progressRoute);
-app.route("/awards", awardsRoute);
-app.route("/surveys", surveysRoute);
+app.route("/orders", orderRoute);
+app.route("/slack", slackRoute);
 
 export default app;

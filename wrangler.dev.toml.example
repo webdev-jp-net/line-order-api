@@ -1,0 +1,28 @@
+# ローカル開発用テンプレート。
+# `cp wrangler.dev.toml.example wrangler.dev.toml` して値を埋める。
+# wrangler.dev.toml は .gitignore 済み（コミットしない）。
+name = "line-order-api"
+main = "src/index.ts"
+workers_dev = true
+compatibility_date = "2026-03-05"
+kv_namespaces = [
+  { binding = "KV", id = "<dev-kv-id>", preview_id = "<dev-preview-kv-id>" }
+]
+
+[dev]
+port = 8787
+local_protocol = "http"
+
+# ローカルでは本番でシークレットにする値も [vars] に置く
+# （wrangler dev は `wrangler secret put` を読まないため）。
+[vars]
+LINE_CHANNEL_ID = "<your-line-channel-id>"
+FRONTEND_URL = "http://localhost:3000"
+SLACK_CHANNEL_ID = "<your-slack-channel-id>"
+# コンソールの「API用テンプレート名」（{name}_{BCP47}、30文字以内）
+LINE_TEMPLATE_PROGRESS = "<template-name>_ja"
+LINE_TEMPLATE_DONE = "<template-name>_ja"
+SESSION_SECRET = "<任意の強いランダム文字列>"
+LINE_CHANNEL_ACCESS_TOKEN = "<line-channel-access-token>"
+SLACK_BOT_TOKEN = "xoxb-..."
+SLACK_SIGNING_SECRET = "<slack-signing-secret>"

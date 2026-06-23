@@ -1,15 +1,7 @@
-name = "line-auth-api"
+name = "line-order-api"
 main = "src/index.ts"
 workers_dev = true
 compatibility_date = "2026-03-05"
 kv_namespaces = [
-  { binding = "KV", id = "abdf4b773b7b45c090de50b08bca2184" }
+  { binding = "KV", id = "REPLACE_WITH_OWN_KV_NAMESPACE_ID" }
 ]
-
-# secrets は `wrangler secret put` で設定
-# wrangler secret put LINE_CHANNEL_SECRET
-# wrangler secret put SESSION_SECRET
-
-[vars]
-LINE_CHANNEL_ID = "2009393073"
-FRONTEND_URL = "https://192.168.11.34:3000"

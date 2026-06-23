@@ -7,7 +7,7 @@ export const rootHandler = (c: Context) => {
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>LINE Auth API</title>
+		<title>LINE Order API</title>
 		<style>
 			body {
 				font-family: 'Helvetica Neue', Arial, sans-serif;
@@ -47,12 +47,12 @@ export const rootHandler = (c: Context) => {
 				margin-right: 8px;
 			}
 			.get { background-color: #61affe; }
-			.put { background-color: #fca130; }
+			.post { background-color: #49cc90; }
 		</style>
 	</head>
 	<body>
-		<h1>LINE Auth API</h1>
-		<p>LIFF + Cloudflare Workers + KV を使用した認証APIです。</p>
+		<h1>LINE Order API</h1>
+		<p>LIFF + Cloudflare Workers + KV を使用した注文受付 API です。</p>
 
 		<h2>認証エンドポイント</h2>
 		<div class="endpoint">
@@ -61,14 +61,20 @@ export const rootHandler = (c: Context) => {
 			<p>ヘッダー: <code>line-id-token</code></p>
 		</div>
 
-		<h2>API エンドポイント（要 Bearer Token）</h2>
+		<h2>注文エンドポイント（要 Bearer Token）</h2>
 		<div class="endpoint">
-			<p><span class="method get">GET</span><code>/profile</code></p>
-			<p>ユーザープロフィールを取得します。</p>
+			<p><span class="method post">POST</span><code>/orders</code></p>
+			<p>注文を作成します。</p>
 		</div>
 		<div class="endpoint">
-			<p><span class="method put">PUT</span><code>/profile</code></p>
-			<p>ユーザープロフィールを登録・更新します。</p>
+			<p><span class="method get">GET</span><code>/orders/history</code></p>
+			<p>注文履歴を取得します。</p>
+		</div>
+
+		<h2>連携エンドポイント</h2>
+		<div class="endpoint">
+			<p><span class="method post">POST</span><code>/slack/interactions</code></p>
+			<p>Slack のボタン操作を受け取ります。</p>
 		</div>
 
 		<h2>ステータス</h2>
