@@ -2,7 +2,7 @@
 
 ## 初回セッション時のみ
 
-1. `git doc-pull` で最新仕様をline-order-documentから同期
+1. 最新仕様をline-order-documentから同期（`_document/` が無ければ初回のみ `git subtree add --prefix=_document git@github.com:webdev-jp-net/line-order-document.git develop --squash`、以降は `git doc-pull`）
 2. Serena初期化 `/mcp__serena__check_onboarding_performed`
 3. 必要ならオンボーディング実行
 

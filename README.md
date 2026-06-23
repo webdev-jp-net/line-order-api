@@ -142,6 +142,14 @@ pnpm deploy   # 本番デプロイ
 
 このプロジェクトでは、`_document/`ディレクトリを[line-order-document](https://github.com/webdev-jp-net/line-order-document)リポジトリからGit Subtreeで取り込んでいます。
 
+#### 初回のみ: 取り込み
+
+`_document/`がまだ無い場合（クローン直後など）は、`git subtree add` で初回取り込みを行います。2回目以降は `git doc-pull` で更新します。
+
+```bash
+git subtree add --prefix=_document git@github.com:webdev-jp-net/line-order-document.git develop --squash
+```
+
 #### 利用可能なGitエイリアス
 
 | エイリアス | コマンド                                                                                                 | 説明                                                          |
