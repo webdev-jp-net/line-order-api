@@ -5,6 +5,10 @@ const orderKey = (userId: string, orderId: string): string =>
 
 const userPrefix = (userId: string): string => `order:${userId}:`;
 
+/** サービスメッセージ用の明細テキスト（例: "タコス × 2"） */
+export const formatOrderDetail = (order: Order): string =>
+	order.orderList.map((i) => `${i.name} × ${i.qty}`).join("\n");
+
 /** 注文を保存（新規・更新共通） */
 export const saveOrder = async (
 	kv: KVNamespace,

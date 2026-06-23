@@ -17,7 +17,7 @@ Value:
 {
   "orderId": "ord_001",
   "userId": "Uxxxx",
-  "name": "注文者の表示名",
+  "name": "ユーザーの表示名",
   "orderList": [{ "productId": "<microCMS id>", "name": "タコス", "qty": 2 }],
   "status": "open",
   "serviceNotificationToken": "...",

@@ -21,24 +21,25 @@ sequenceDiagram
     Worker->>LINE: POST /message/v3/notifier/token
     LINE-->>Worker: serviceNotificationToken
     Worker->>KV: order:{userId}:{orderId} 保存
+    Worker->>LINE: POST /message/v3/notifier/send (注文受付)
+    LINE-->>User: サービスメッセージ（注文受付）
     Worker->>Slack: 新規注文を通知
     Note over Slack: 運営がボタン操作
     Slack->>Worker: POST /slack/interactions
     Worker->>KV: status 更新
-    Worker->>LINE: POST /message/v3/notifier/send (progress / done 時)
-    LINE-->>User: サービスメッセージ
+    Worker->>LINE: POST /message/v3/notifier/send (done 時)
+    LINE-->>User: サービスメッセージ（準備完了）
 ```
 
 ## 状態遷移
 
-`open → progress → done → closed`
+`open → done → closed`
 
-| slug       | 日本語   | 操作（Slack ボタン）   | 注文者への LINE 通知 |
-| ---------- | -------- | ---------------------- | -------------------- |
-| `open`     | 注文受付 | （注文作成時の初期値） | -                    |
-| `progress` | 手配開始 | 手配開始               | 送る                 |
-| `done`     | 準備完了 | 準備完了               | 送る                 |
-| `closed`   | 受渡完了 | 受渡完了               | -                    |
+| slug     | 日本語   | 操作（Slack ボタン）   | ユーザーへの LINE 通知 |
+| -------- | -------- | ---------------------- | -------------------- |
+| `open`   | 注文受付 | （注文作成時の初期値） | 送る（注文受付）     |
+| `done`   | 準備完了 | 準備完了               | 送る                 |
+| `closed` | 受渡完了 | 受渡完了               | -                    |
 
 ## メニュー
 
@@ -84,10 +85,11 @@ sequenceDiagram
 1. 注文内容を検証します（`productId`・`name` が文字列、`qty` が1以上の整数）
 2. サービス通知トークンを発行します（`liffAccessToken` を入力）
 3. 注文をKVに保存します（`status: open`、表示名はJWTから取得）
-4. Slackに新規注文を通知します
-5. `{ orderId, status }` を返します
+4. 注文受付のサービスメッセージをユーザーへ送信します（自動）
+5. Slackに新規注文を通知します
+6. `{ orderId, status }` を返します
 
-`liffAccessToken` は認証用ではなく、通知トークン発行の入力です。認証は別途Bearer JWTで行います。
+`liffAccessToken` は認証用ではなく、サービス通知トークン発行の入力です。認証は別途Bearer JWTで行います。
 
 ### GET /orders/history
 
@@ -96,7 +98,7 @@ sequenceDiagram
 ```json
 {
   "orderList": [
-    { "orderId": "ord_001", "status": "progress", "orderList": [], "createdAt": "..." }
+    { "orderId": "ord_001", "status": "done", "orderList": [], "createdAt": "..." }
   ]
 }
 ```
@@ -108,14 +110,14 @@ Slackボタン押下を受けます。`application/x-www-form-urlencoded` の `p
 1. 署名を検証します（[Slack 連携](#slack-連携)）
 2. `payload.actions[0].value`（`{ userId, orderId, status }`）を検証します
 3. 即200を返します（3秒制限）。状態更新・LINE送信・メッセージ差し替えは非同期で実行します
-4. 状態を更新し、`progress` / `done` ならLINEサービスメッセージを送信します
+4. 状態を更新し、`done` ならLINEサービスメッセージを送信します
 5. `payload.response_url` に `replace_original: true` で投稿し、元メッセージを最新状態へ差し替えます
 
 ## サービスメッセージ（LINE MINI App）
 
-`progress`（手配開始）と `done`（準備完了）で注文者へ送ります。状態ごとに別テンプレートを使います。
+注文受付時（注文作成時に自動）と `done`（準備完了、Slack操作）でユーザーへ送ります。状態ごとに別テンプレートを使います。
 
-### 通知トークンの発行（注文作成時）
+### サービス通知トークンの発行（注文作成時）
 
 1. クライアントが `liff.getAccessToken()` でLIFFアクセストークンを取得します（有効12時間）
 2. 注文作成リクエストのボディに `liffAccessToken` として送ります
@@ -124,14 +126,23 @@ Slackボタン押下を受けます。`application/x-www-form-urlencoded` の `p
    - ボディ: `{ "liffAccessToken": "..." }`
 4. 得たトークンを注文の `serviceNotificationToken` に保存します（有効1年・最大5回送信・使用ごとに値が更新）
 
-### 送信（progress / done）
+### 送信（注文受付 / 準備完了）
 
 - エンドポイント: `POST https://api.line.me/message/v3/notifier/send?target=service`
 - ヘッダー: `Authorization: Bearer {チャネルアクセストークン}`
 - ボディ: `{ "templateName": "...", "params": {...}, "notificationToken": "..." }`
 - `templateName` はLINE Developersコンソールで登録したテンプレートの「API用テンプレート名」です（`{template name}_{BCP 47 language tag}`、30文字以内）
-- `params` はテンプレートが定義する変数に一致させます。変数のないテンプレートは `{}` です
 - 文面は事前登録テンプレートを使います（自由文は不可です）
+- サービス通知トークンは送信のたびに更新されます。送信レスポンスの `notificationToken`（更新後の値）を注文に保存し直し、後続の送信（準備完了）はこの値を使います。1つの注文につき最大5回送信できます
+
+テンプレートと `params` の対応:
+
+| 通知 | テンプレート（env） | `params` |
+| --- | --- | --- |
+| 注文受付（open・自動） | `order_request_d_o_ja`（`LINE_TEMPLATE_OPEN`） | `number`=orderId / `order_detail`=明細 / `how_to_receive`=固定文 / `btn1_url` |
+| 準備完了（done・Slack操作） | `order_comp_d_o_ja`（`LINE_TEMPLATE_DONE`） | `number`=orderId / `order_detail`=明細 / `content`=固定文 / `btn1_url` |
+
+`order_detail` は明細（`name × qty`）を改行区切りで生成します。`btn1_url` はボタンURLで、`FRONTEND_URL` を使います。テンプレートのボタンは省略できない（ボタンなしテンプレートが用意できない）ため、有効なURLを必ず渡します。
 
 ## Slack 連携
 

@@ -2,17 +2,16 @@
 	"compilerOptions": {
 		"target": "ES2021",
 		"module": "ESNext",
-		"moduleResolution": "node",
+		"moduleResolution": "bundler",
 		"lib": ["ES2021"],
 		"types": ["@cloudflare/workers-types"],
 		"strict": true,
 		"isolatedModules": true,
-		"baseUrl": "./",
 		"paths": {
-			"@handler/*": ["src/handler/*"],
-			"@routes/*": ["src/routes/*"],
-			"@util/*": ["src/util/*"],
-			"@middleware/*": ["src/middleware/*"]
+			"@handler/*": ["./src/handler/*"],
+			"@routes/*": ["./src/routes/*"],
+			"@util/*": ["./src/util/*"],
+			"@middleware/*": ["./src/middleware/*"]
 		},
 		"allowSyntheticDefaultImports": true,
 		"outDir": "./dist",

@@ -1,7 +1,11 @@
 import type { Context } from "hono";
 import type { Env, OrderItem } from "../../types";
-import { issueNotifierToken } from "@util/lineApi";
-import { createOrder } from "@util/orderStore";
+import {
+	issueChannelAccessToken,
+	issueNotifierToken,
+	sendServiceMessage,
+} from "@util/lineApi";
+import { createOrder, formatOrderDetail, saveOrder } from "@util/orderStore";
 import { postOrderNotification } from "@util/slackApi";
 
 type CreateOrderBody = {
@@ -45,9 +49,14 @@ export const createOrderHandler = async (c: Context<Env>) => {
 	}
 
 	try {
+		const channelAccessToken = await issueChannelAccessToken({
+			channelId: c.env.LINE_CHANNEL_ID,
+			channelSecret: c.env.LINE_CHANNEL_SECRET,
+		});
+
 		const serviceNotificationToken = await issueNotifierToken({
 			liffAccessToken: body.liffAccessToken as string,
-			channelAccessToken: c.env.LINE_CHANNEL_ACCESS_TOKEN,
+			channelAccessToken,
 		});
 
 		const order = await createOrder(c.env.KV, {
@@ -57,6 +66,22 @@ export const createOrderHandler = async (c: Context<Env>) => {
 			serviceNotificationToken,
 			now: new Date().toISOString(),
 		});
+
+		// 注文受付をユーザーへ通知（自動）。
+		// 送信でトークンが更新されるため、次の送信（準備完了）に備えて保存する。
+		const nextToken = await sendServiceMessage({
+			notificationToken: serviceNotificationToken,
+			templateName: c.env.LINE_TEMPLATE_OPEN,
+			params: {
+				number: order.orderId,
+				btn1_url: c.env.FRONTEND_URL,
+				order_detail: formatOrderDetail(order),
+				how_to_receive: "受け取りカウンターへお越しください。",
+			},
+			channelAccessToken,
+		});
+		order.serviceNotificationToken = nextToken;
+		await saveOrder(c.env.KV, order);
 
 		await postOrderNotification({
 			botToken: c.env.SLACK_BOT_TOKEN,

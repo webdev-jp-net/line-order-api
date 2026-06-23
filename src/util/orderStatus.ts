@@ -1,20 +1,25 @@
 import type { Order, OrderStatus } from "../types";
-import { updateOrderStatus } from "@util/orderStore";
-import { sendServiceMessage } from "@util/lineApi";
+import {
+	formatOrderDetail,
+	saveOrder,
+	updateOrderStatus,
+} from "@util/orderStore";
+import { issueChannelAccessToken, sendServiceMessage } from "@util/lineApi";
 
 /**
- * 注文状態を更新し、通知対象の状態（progress / done）になったら
+ * 注文状態を更新し、通知対象の状態（done）になったら
  * LINE サービスメッセージを送る。
  *
  * templateName は LINE Developers コンソールに登録したサービスメッセージの
  * 「API用テンプレート名」（`{template name}_{BCP 47 language tag}`、30文字以内）を
  * env から渡す。
- * params はテンプレートが定義する変数に一致させる。変数のないテンプレートは `{}`。
  */
 export const applyOrderStatus = async (
 	deps: {
 		kv: KVNamespace;
-		channelAccessToken: string;
+		channelId: string;
+		channelSecret: string;
+		frontendUrl: string;
 		// status → 登録済みテンプレートの「API用テンプレート名」
 		templates: Partial<Record<OrderStatus, string>>;
 	},
@@ -36,13 +41,24 @@ export const applyOrderStatus = async (
 
 	const templateName = deps.templates[updated.status];
 	if (templateName) {
-		await sendServiceMessage({
+		const channelAccessToken = await issueChannelAccessToken({
+			channelId: deps.channelId,
+			channelSecret: deps.channelSecret,
+		});
+		// 送信でサービス通知トークンが更新されるため、更新後の値を保存する。
+		const nextToken = await sendServiceMessage({
 			notificationToken: updated.serviceNotificationToken,
 			templateName,
-			// 登録テンプレートが変数を持つ場合はここで変数キーに合わせて設定する。
-			params: {},
-			channelAccessToken: deps.channelAccessToken,
+			params: {
+				number: updated.orderId,
+				content: "受け取りカウンターへお越しください。",
+				btn1_url: deps.frontendUrl,
+				order_detail: formatOrderDetail(updated),
+			},
+			channelAccessToken,
 		});
+		updated.serviceNotificationToken = nextToken;
+		await saveOrder(deps.kv, updated);
 	}
 
 	return updated;

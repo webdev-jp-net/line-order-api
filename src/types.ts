@@ -2,14 +2,14 @@
 export type Bindings = {
 	KV: KVNamespace;
 	LINE_CHANNEL_ID: string;
-	LINE_CHANNEL_ACCESS_TOKEN: string;
+	LINE_CHANNEL_SECRET: string;
 	SESSION_SECRET: string;
 	FRONTEND_URL: string;
 	SLACK_BOT_TOKEN: string;
 	SLACK_SIGNING_SECRET: string;
 	SLACK_CHANNEL_ID: string;
 	// サービスメッセージの「API用テンプレート名」（コンソール登録値、`{name}_{BCP47}`）
-	LINE_TEMPLATE_PROGRESS: string;
+	LINE_TEMPLATE_OPEN: string;
 	LINE_TEMPLATE_DONE: string;
 };
 
@@ -40,7 +40,7 @@ export type LineIdTokenPayload = {
 
 // 注文ドメイン
 
-export type OrderStatus = "open" | "progress" | "done" | "closed";
+export type OrderStatus = "open" | "done" | "closed";
 
 export type OrderItem = {
 	productId: string;

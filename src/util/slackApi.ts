@@ -49,7 +49,6 @@ const timingSafeEqual = (a: string, b: string): boolean => {
 
 const STATUS_LABEL: Record<OrderStatus, string> = {
 	open: "注文受付",
-	progress: "手配開始",
 	done: "準備完了",
 	closed: "受渡完了",
 };
@@ -58,15 +57,14 @@ const STATUS_LABEL: Record<OrderStatus, string> = {
 const NEXT_ACTION: Partial<
 	Record<OrderStatus, { label: string; status: OrderStatus }>
 > = {
-	open: { label: "手配開始", status: "progress" },
-	progress: { label: "準備完了", status: "done" },
+	open: { label: "準備完了", status: "done" },
 	done: { label: "受渡完了", status: "closed" },
 };
 
 /** 注文内容の表示テキスト */
 const orderSummary = (order: Order): string => {
 	const items = order.orderList.map((i) => `・${i.name} x${i.qty}`).join("\n");
-	return `注文ID: ${order.orderId}\n注文者: ${order.name}\n${items}`;
+	return `注文ID: ${order.orderId}\nユーザー: ${order.name}\n${items}`;
 };
 
 /** 注文の現在状態に応じた Block Kit ブロックを組み立てる */
