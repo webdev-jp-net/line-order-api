@@ -11,4 +11,6 @@ LINEミニアプリ注文システムの仕様です。領域別に分かれて�
 
 ## ユーザーアプリ（フロントエンド）
 
-- [機能仕様](user-app/index.md)
+- [機能仕様](user-app/index.md) - 概要・技術構成・認証フロー・ルーティング・API連携
+- [メニュー](user-app/menu.md) - microCMS / Jamstack（ビルド時取得）
+- [スタイリング方針](user-app/style.md) - CSS Modules / SCSSの実装方針
