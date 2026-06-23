@@ -105,13 +105,16 @@ export const issueNotifierToken = async (params: {
 /**
  * サービスメッセージを送信する
  * 文面は事前登録したテンプレート（templateName + params）を使う。
+ * 送信のたびにサービス通知トークンは更新されるため、レスポンスの
+ * `notificationToken`（更新後の値）を返す。後続の送信はこの値を使う。
+ * @see https://developers.line.biz/ja/docs/line-mini-app/develop/service-messages/
  */
 export const sendServiceMessage = async (params: {
 	notificationToken: string;
 	templateName: string;
 	params: Record<string, string>;
 	channelAccessToken: string;
-}): Promise<void> => {
+}): Promise<string> => {
 	const res = await fetch(LINE_NOTIFIER_SEND_URL, {
 		method: "POST",
 		headers: {
@@ -129,4 +132,7 @@ export const sendServiceMessage = async (params: {
 		const error = await res.text();
 		throw new Error(`notifier/send failed: ${res.status} ${error}`);
 	}
+
+	const data = (await res.json()) as { notificationToken: string };
+	return data.notificationToken;
 };

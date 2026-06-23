@@ -14,15 +14,15 @@
 
 ## 主要用語
 
-| 用語                                     | 説明                                                    |
-| ---------------------------------------- | ------------------------------------------------------- |
-| ユーザー                                 | 注文するエンドユーザー（LINE / LIFF アカウント）        |
-| メニュー                                 | 提供品目。microCMS で管理し、FE がビルド時に取得        |
-| 注文（order）                            | KV に保存する注文レコード（`order:{userId}:{orderId}`） |
-| 明細                                     | 注文内の品目（`productId` / `name` / `qty`）            |
-| サービスメッセージ                       | LINE MINI App でユーザーへ送る通知                        |
-| サービス通知トークン（serviceNotificationToken） | サービスメッセージ送信に使うユーザー単位のトークン      |
-| LIFF アクセストークン                    | `liff.getAccessToken()` で取得。サービス通知トークン発行の入力  |
-| ID トークン                              | `liff.getIDToken()` で取得。`/user-token` で検証        |
-| userToken（JWT）                         | API 認証用に発行する JWT                                |
-| 運営                                     | Slack で注文を処理する側                                |
+| 用語                 | コード上の識別子           | 説明                                                          |
+| -------------------- | -------------------------- | ------------------------------------------------------------- |
+| ユーザー             | -                          | 注文するエンドユーザー（LINE / LIFF アカウント）              |
+| メニュー             | -                          | 提供品目。microCMS で管理し、FE がビルド時に取得              |
+| 注文                 | `order` / `Order`          | KV に保存する注文レコード（`order:{userId}:{orderId}`）       |
+| 明細                 | `OrderItem`                | 注文内の品目（`productId` / `name` / `qty`）                  |
+| サービスメッセージ   | -                          | LINE MINI App でユーザーへ送る通知                            |
+| サービス通知トークン | `serviceNotificationToken` | サービスメッセージ送信に使うユーザー単位のトークン            |
+| LIFF アクセストークン | `liffAccessToken`         | `liff.getAccessToken()` で取得。サービス通知トークン発行の入力 |
+| ID トークン          | `idToken`                  | `liff.getIDToken()` で取得。`/user-token` で検証              |
+| userToken            | `userToken`（JWT）         | API 認証用に発行する JWT                                      |
+| 運営                 | -                          | Slack で注文を処理する側                                      |

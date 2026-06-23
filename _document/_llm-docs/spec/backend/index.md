@@ -133,6 +133,7 @@ Slackボタン押下を受けます。`application/x-www-form-urlencoded` の `p
 - ボディ: `{ "templateName": "...", "params": {...}, "notificationToken": "..." }`
 - `templateName` はLINE Developersコンソールで登録したテンプレートの「API用テンプレート名」です（`{template name}_{BCP 47 language tag}`、30文字以内）
 - 文面は事前登録テンプレートを使います（自由文は不可です）
+- サービス通知トークンは送信のたびに更新されます。送信レスポンスの `notificationToken`（更新後の値）を注文に保存し直し、後続の送信（準備完了）はこの値を使います。1つの注文につき最大5回送信できます
 
 テンプレートと `params` の対応:
 

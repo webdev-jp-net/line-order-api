@@ -5,7 +5,7 @@ import {
 	issueNotifierToken,
 	sendServiceMessage,
 } from "@util/lineApi";
-import { createOrder, formatOrderDetail } from "@util/orderStore";
+import { createOrder, formatOrderDetail, saveOrder } from "@util/orderStore";
 import { postOrderNotification } from "@util/slackApi";
 
 type CreateOrderBody = {
@@ -67,8 +67,9 @@ export const createOrderHandler = async (c: Context<Env>) => {
 			now: new Date().toISOString(),
 		});
 
-		// 注文受付をユーザーへ通知（自動）
-		await sendServiceMessage({
+		// 注文受付をユーザーへ通知（自動）。
+		// 送信でトークンが更新されるため、次の送信（準備完了）に備えて保存する。
+		const nextToken = await sendServiceMessage({
 			notificationToken: serviceNotificationToken,
 			templateName: c.env.LINE_TEMPLATE_OPEN,
 			params: {
@@ -79,6 +80,8 @@ export const createOrderHandler = async (c: Context<Env>) => {
 			},
 			channelAccessToken,
 		});
+		order.serviceNotificationToken = nextToken;
+		await saveOrder(c.env.KV, order);
 
 		await postOrderNotification({
 			botToken: c.env.SLACK_BOT_TOKEN,

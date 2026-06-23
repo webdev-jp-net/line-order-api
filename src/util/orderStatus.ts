@@ -1,5 +1,9 @@
 import type { Order, OrderStatus } from "../types";
-import { formatOrderDetail, updateOrderStatus } from "@util/orderStore";
+import {
+	formatOrderDetail,
+	saveOrder,
+	updateOrderStatus,
+} from "@util/orderStore";
 import { issueChannelAccessToken, sendServiceMessage } from "@util/lineApi";
 
 /**
@@ -41,7 +45,8 @@ export const applyOrderStatus = async (
 			channelId: deps.channelId,
 			channelSecret: deps.channelSecret,
 		});
-		await sendServiceMessage({
+		// 送信でサービス通知トークンが更新されるため、更新後の値を保存する。
+		const nextToken = await sendServiceMessage({
 			notificationToken: updated.serviceNotificationToken,
 			templateName,
 			params: {
@@ -52,6 +57,8 @@ export const applyOrderStatus = async (
 			},
 			channelAccessToken,
 		});
+		updated.serviceNotificationToken = nextToken;
+		await saveOrder(deps.kv, updated);
 	}
 
 	return updated;
