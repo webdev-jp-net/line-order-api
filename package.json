@@ -1,7 +1,7 @@
 {
-	"name": "line-auth-api",
-	"version": "1.0.0",
-	"description": "LINE Login + Cloudflare Workers + KV 認証API",
+	"name": "line-order-api",
+	"version": "0.1.0",
+	"description": "LINE MINI App 注文受付 API（Cloudflare Workers + Hono + KV）",
 	"main": "index.js",
 	"scripts": {
 		"build": "tsc",
@@ -10,20 +10,28 @@
 		"start": "node dist/index.js",
 		"dev": "wrangler dev --config wrangler.dev.toml",
 		"deploy": "wrangler deploy --config wrangler.toml",
-		"lint": "biome lint --write"
+		"format": "biome format --write src/ && textlint --fix \"**/*.md\"",
+		"lint": "biome lint --write src/"
 	},
-	"keywords": ["line", "login", "oauth", "cloudflare-workers", "hono"],
-	"author": "",
 	"license": "ISC",
-	"dependencies": {
-		"hono": "^4.6.14"
-	},
 	"devDependencies": {
+		"@biomejs/biome": "2.5.0",
 		"@cloudflare/workers-types": "^4.20241218.0",
 		"@types/node": "^22.10.5",
-		"biome": "^0.3.3",
-		"tsconfig-paths": "^4.2.0",
-		"typescript": "^5.7.2",
-		"wrangler": "^3.99.0"
+		"textlint": "^15.7.1",
+		"textlint-rule-preset-jtf-style": "^3.0.3",
+		"tsconfig-paths": "^4.2.0"
+	},
+	"pnpm": {
+		"minimumReleaseAge": 10080,
+		"overrides": {
+			"jsdom": "25.0.1",
+			"jsdom>parse5": "7.3.0"
+		}
+	},
+	"dependencies": {
+		"hono": "^4.12.26",
+		"typescript": "^6.0.3",
+		"wrangler": "^4.103.0"
 	}
 }

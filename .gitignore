@@ -17,3 +17,9 @@ dist/
 
 # 開発環境用の設定
 wrangler.dev.toml
+
+# AIエージェント向け
+.claude/tmp
+.claude/settings.local.json
+.claude/launch.json
+.claude/worktrees
