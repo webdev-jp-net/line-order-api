@@ -1,0 +1,5 @@
+{
+  "name": "project-assistant",
+  "description": "開発効率を向上させるカスタムコマンド集",
+  "custom_commands": "enabled"
+}
