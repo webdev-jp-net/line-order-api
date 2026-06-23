@@ -1,7 +1,11 @@
 import type { Context } from "hono";
 import type { Env, OrderItem } from "../../types";
-import { issueNotifierToken } from "@util/lineApi";
-import { createOrder } from "@util/orderStore";
+import {
+	issueChannelAccessToken,
+	issueNotifierToken,
+	sendServiceMessage,
+} from "@util/lineApi";
+import { createOrder, formatOrderDetail } from "@util/orderStore";
 import { postOrderNotification } from "@util/slackApi";
 
 type CreateOrderBody = {
@@ -45,9 +49,14 @@ export const createOrderHandler = async (c: Context<Env>) => {
 	}
 
 	try {
+		const channelAccessToken = await issueChannelAccessToken({
+			channelId: c.env.LINE_CHANNEL_ID,
+			channelSecret: c.env.LINE_CHANNEL_SECRET,
+		});
+
 		const serviceNotificationToken = await issueNotifierToken({
 			liffAccessToken: body.liffAccessToken as string,
-			channelAccessToken: c.env.LINE_CHANNEL_ACCESS_TOKEN,
+			channelAccessToken,
 		});
 
 		const order = await createOrder(c.env.KV, {
@@ -56,6 +65,19 @@ export const createOrderHandler = async (c: Context<Env>) => {
 			orderList: body.orderList as OrderItem[],
 			serviceNotificationToken,
 			now: new Date().toISOString(),
+		});
+
+		// 注文受付をユーザーへ通知（自動）
+		await sendServiceMessage({
+			notificationToken: serviceNotificationToken,
+			templateName: c.env.LINE_TEMPLATE_OPEN,
+			params: {
+				number: order.orderId,
+				btn1_url: c.env.FRONTEND_URL,
+				order_detail: formatOrderDetail(order),
+				how_to_receive: "受け取りカウンターへお越しください。",
+			},
+			channelAccessToken,
 		});
 
 		await postOrderNotification({

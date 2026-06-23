@@ -10,7 +10,7 @@ type SlackActionValue = {
 };
 
 // ボタンで遷移しうる状態（open は初期状態なので対象外）
-const VALID_STATUS: OrderStatus[] = ["progress", "done", "closed"];
+const VALID_STATUS: OrderStatus[] = ["done", "closed"];
 
 const isValidActionValue = (v: unknown): v is SlackActionValue => {
 	const a = v as Partial<SlackActionValue> | null;
@@ -75,9 +75,10 @@ export const interactionsHandler = async (c: Context<Env>) => {
 				const updated = await applyOrderStatus(
 					{
 						kv: c.env.KV,
-						channelAccessToken: c.env.LINE_CHANNEL_ACCESS_TOKEN,
+						channelId: c.env.LINE_CHANNEL_ID,
+						channelSecret: c.env.LINE_CHANNEL_SECRET,
+						frontendUrl: c.env.FRONTEND_URL,
 						templates: {
-							progress: c.env.LINE_TEMPLATE_PROGRESS,
 							done: c.env.LINE_TEMPLATE_DONE,
 						},
 					},

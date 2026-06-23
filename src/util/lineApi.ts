@@ -1,9 +1,42 @@
 import type { LineIdTokenPayload } from "../types";
 
 const LINE_VERIFY_URL = "https://api.line.me/oauth2/v2.1/verify";
+const LINE_TOKEN_URL = "https://api.line.me/oauth2/v2.3/token";
 const LINE_NOTIFIER_TOKEN_URL = "https://api.line.me/message/v3/notifier/token";
 const LINE_NOTIFIER_SEND_URL =
 	"https://api.line.me/message/v3/notifier/send?target=service";
+
+/**
+ * ステートレスチャネルアクセストークンを発行する（有効15分）。
+ * チャネルID・チャネルシークレットで client_credentials 認証する。
+ * @see https://developers.line.biz/ja/docs/basics/channel-access-token/
+ */
+export const issueChannelAccessToken = async (params: {
+	channelId: string;
+	channelSecret: string;
+}): Promise<string> => {
+	const body = new URLSearchParams({
+		grant_type: "client_credentials",
+		client_id: params.channelId,
+		client_secret: params.channelSecret,
+	});
+
+	const res = await fetch(LINE_TOKEN_URL, {
+		method: "POST",
+		headers: { "Content-Type": "application/x-www-form-urlencoded" },
+		body: body.toString(),
+	});
+
+	if (!res.ok) {
+		const error = await res.text();
+		throw new Error(
+			`channel access token issue failed: ${res.status} ${error}`,
+		);
+	}
+
+	const data = (await res.json()) as { access_token: string };
+	return data.access_token;
+};
 
 /**
  * IDトークンをLINEサーバーで検証し、ペイロードを取得

@@ -66,7 +66,7 @@ JWTはステートレスなため、KVへのセッション問い合わせが不
 | 変数名                      | 説明                                           |
 | --------------------------- | ---------------------------------------------- |
 | `SESSION_SECRET`            | JWT 署名キー                                   |
-| `LINE_CHANNEL_ACCESS_TOKEN` | サービスメッセージ送信・通知トークン発行に使用 |
+| `LINE_CHANNEL_SECRET` | チャネルアクセストークンのステートレス発行に使用（サービス通知トークン発行・サービスメッセージ送信） |
 | `SLACK_BOT_TOKEN`           | Slack への通知投稿に使用                       |
 | `SLACK_SIGNING_SECRET`      | Slack リクエストの署名検証に使用               |
 
@@ -79,7 +79,7 @@ JWTはステートレスなため、KVへのセッション問い合わせが不
 | `LINE_CHANNEL_ID`        | LINE チャネル ID（ID Token の aud 検証）                  |
 | `FRONTEND_URL`           | LIFF アプリの URL（CORS 許可対象）                        |
 | `SLACK_CHANNEL_ID`       | 新規注文を投稿する Slack チャンネル ID                    |
-| `LINE_TEMPLATE_PROGRESS` | 手配開始通知の「API用テンプレート名」（コンソール登録値） |
+| `LINE_TEMPLATE_OPEN` | 注文受付通知の「API用テンプレート名」（コンソール登録値） |
 | `LINE_TEMPLATE_DONE`     | 準備完了通知の「API用テンプレート名」（コンソール登録値） |
 
 ## リファレンス

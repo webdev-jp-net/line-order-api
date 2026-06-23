@@ -4,7 +4,7 @@
 
 ## プロジェクト概要
 
-LINEミニアプリを入口に、注文受付から「手配開始」「準備完了」の通知までを行う注文受付システムです。注文者はミニアプリで注文し、運営はSlackで通知を受けてボタンで状態を更新します。状態に応じて注文者へLINEサービスメッセージを送ります。
+LINEミニアプリを入口に、注文受付から「準備完了」の通知までを行う注文受付システムです。ユーザーはミニアプリで注文し、運営はSlackで通知を受けてボタンで状態を更新します。状態に応じてユーザーへLINEサービスメッセージを送ります。
 
 詳細は [\_llm-docs/project.md](_llm-docs/project.md) を参照してください。
 
@@ -20,11 +20,11 @@ LINEミニアプリを入口に、注文受付から「手配開始」「準備�
 
 **LINE Developers Console**
 
-1. LINE Loginチャネル（LINE MINI App）を作成します
+1. LINE MINI Appチャネルを作成します
 2. スコープ `profile` と `openid` を有効化します
 3. チャネルIDを控えます → `LINE_CHANNEL_ID`
-4. チャネルアクセストークンを発行します → `LINE_CHANNEL_ACCESS_TOKEN`
-5. ［サービスメッセージテンプレート］タブで「手配開始」「準備完了」のテンプレートを登録し、各「API用テンプレート名」（`{template name}_{BCP 47 language tag}`、30文字以内）を控えます → `LINE_TEMPLATE_PROGRESS` / `LINE_TEMPLATE_DONE`
+4. チャネルシークレットを控えます → `LINE_CHANNEL_SECRET`（サーバがチャネルアクセストークンをステートレス発行するのに使用）
+5. ［サービスメッセージテンプレート］タブで「注文受付」「準備完了」のテンプレートを登録し、各「API用テンプレート名」（`{template name}_{BCP 47 language tag}`、30文字以内）を控えます → `LINE_TEMPLATE_OPEN` / `LINE_TEMPLATE_DONE`
 
 **Slack App**
 
