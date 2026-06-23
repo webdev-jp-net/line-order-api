@@ -110,8 +110,6 @@ alwaysApply: true
 
 - `_llm-rules/core_rules.md`（必須・確認済み）
 - `_llm-rules/implementation_principles.md`（必須・確認済み）
-- `_llm-rules/coding.md`（コーディング標準）
-- `_llm-rules/components.md`（コンポーネントガイドライン）
 - `_llm-rules/github_integration.md`（リポジトリ作業が含まれる場合）
 
 ### ドキュメント・計画作業
@@ -156,9 +154,6 @@ alwaysApply: true
   → github_integration.md + core_rules.md
   → ドキュメント反映（仕様書・設計書の更新）
   → 注意: ドキュメント更新の完了を確認後にPR作成
-
-- **新しいReactコンポーネント実装**
-  → coding.md + components.md + implementation_principles.md + core_rules.md
 
 - **ページコンポーネント生成（scaffdog使用）**
   → ページコンポーネント生成カテゴリのルールを適用
