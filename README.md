@@ -1,25 +1,33 @@
-# LINE Auth API
+# LINE Order API
 
-LIFF + Cloudflare Workers + KV を使用した認証APIです。
-LIFF SDK で取得した LINE ID Token をサーバー側で検証し、JWT を発行して API 認証を行います。
+LIFF + Cloudflare Workers + KVを使用した注文受付APIです。
+LINEミニアプリから注文を受け、Slackで運営に通知し、準備完了時にLINEサービスメッセージで注文者へ知らせます。
+認証はLIFFのID Tokenをサーバーで検証し、JWTを発行して行います。
 
 ## 技術スタック
 
 ### インフラ / デプロイ
+
 - **Cloudflare Workers** - サーバーレス実行環境
-- **Cloudflare KV** - ユーザーデータの永続化
-- **Wrangler** - Cloudflare Workers 公式 CLI
+- **Cloudflare KV** - 注文データの永続化
+- **Wrangler** - Cloudflare Workers公式CLI
 
 ### Web フレームワーク
-- **Hono** - 軽量・高速な Web フレームワーク（JWT ヘルパー含む）
+
+- **Hono** - 軽量・高速なWebフレームワーク（JWTヘルパー含む）
 
 ### 言語 / 開発環境
+
 - **TypeScript** - 静的型付け
 - **Biome** - コードフォーマッタ兼リンター
+- **textlint** - Markdownの文章リンター
 
-### 外部 API
-- **LINE Login v2.1** - ID Token 検証
-- **LIFF SDK** - LINE ログイン・ID Token 取得
+### 外部サービス
+
+- **LINE Login v2.1 / LIFF SDK** - ログイン・ID Token / アクセストークン取得
+- **LINE MINI App サービスメッセージ** - 準備完了通知
+- **microCMS** - メニューマスター（FEがビルド時に取得）
+- **Slack** - 運営への新規注文通知・状態更新操作
 
 ---
 
@@ -27,21 +35,27 @@ LIFF SDK で取得した LINE ID Token をサーバー側で検証し、JWT を�
 
 ```mermaid
 sequenceDiagram
-	participant User as LIFF App
-	participant Worker as Cloudflare Workers
-	participant LINE as LINE API
-	participant KV as Cloudflare KV
+    participant User as LIFF App
+    participant Worker as Cloudflare Workers
+    participant LINE as LINE API
+    participant KV as Cloudflare KV
+    participant Slack as Slack
 
-	User->>User: liff.init() + liff.getIDToken()
-	User->>Worker: GET /user-token (header: line-id-token)
-	Worker->>LINE: POST /oauth2/v2.1/verify
-	LINE-->>Worker: LINE User ID
-	Worker->>KV: user:{lineUserId} upsert
-	Worker-->>User: JSON { userToken (JWT), lineUserId }
-	User->>Worker: GET /profile (header: Authorization: Bearer JWT)
-	Worker->>Worker: JWT 検証
-	Worker->>KV: user:{lineUserId} 取得
-	Worker-->>User: JSON UserProfile
+    User->>User: liff.init() / getIDToken() / getAccessToken()
+    User->>Worker: GET /user-token (header: line-id-token)
+    Worker->>LINE: POST /oauth2/v2.1/verify
+    LINE-->>Worker: lineUserId + 表示名
+    Worker-->>User: { userToken (JWT), lineUserId }
+    User->>Worker: POST /orders (Bearer JWT, body: orderList + liffAccessToken)
+    Worker->>LINE: POST /message/v3/notifier/token
+    LINE-->>Worker: serviceNotificationToken
+    Worker->>KV: order:{userId}:{orderId} 保存
+    Worker->>Slack: 新規注文を通知
+    Note over Slack: 運営がボタン操作
+    Slack->>Worker: POST /slack/interactions
+    Worker->>KV: status 更新
+    Worker->>LINE: POST /message/v3/notifier/send (progress / done 時)
+    LINE-->>User: サービスメッセージ
 ```
 
 ---
@@ -55,31 +69,38 @@ src/
 ├── routes/
 │   ├── rootRoute.ts          # GET /
 │   ├── userTokenRoute.ts     # GET /user-token
-│   └── profileRoute.ts       # GET/PUT /profile
+│   ├── orderRoute.ts         # POST /orders, GET /orders/history
+│   └── slackRoute.ts         # POST /slack/interactions
 ├── handler/
 │   ├── rootHandler.ts        # HTML ステータスページ
 │   ├── userTokenHandler.ts   # LINE ID Token → JWT 発行
-│   └── profile/
-│       ├── getProfileHandler.ts  # プロフィール取得
-│       └── putProfileHandler.ts  # プロフィール登録・更新
+│   ├── order/
+│   │   ├── createOrderHandler.ts        # 注文作成
+│   │   └── getOrderHistoryHandler.ts    # 注文履歴
+│   └── slack/
+│       └── interactionsHandler.ts       # Slack ボタン操作受け
 ├── middleware/
 │   └── authMiddleware.ts     # Bearer JWT 認証
 └── util/
     ├── lineApi.ts            # LINE API 通信
     ├── jwt.ts                # JWT 署名・検証
-    └── userStore.ts          # ユーザーデータ CRUD
+    ├── orderStore.ts         # 注文データ CRUD
+    └── slackApi.ts           # Slack 通知・署名検証
 ```
 
 ---
 
 ## エンドポイント
 
-| メソッド | パス | 認証 | 説明 |
-|---|---|---|---|
-| GET | `/` | 不要 | HTML ステータスページ |
-| GET | `/user-token` | `line-id-token` ヘッダー | JWT 発行 |
-| GET | `/profile` | Bearer JWT | プロフィール取得 |
-| PUT | `/profile` | Bearer JWT | プロフィール登録・更新 |
+| メソッド | パス                  | 認証                     | 説明                                          |
+| -------- | --------------------- | ------------------------ | --------------------------------------------- |
+| GET      | `/`                   | 不要                     | HTML ステータスページ                         |
+| GET      | `/user-token`         | `line-id-token` ヘッダー | JWT 発行                                      |
+| POST     | `/orders`             | Bearer JWT               | 注文作成（ボディに `liffAccessToken` を含む） |
+| GET      | `/orders/history`     | Bearer JWT               | 注文履歴                                      |
+| POST     | `/slack/interactions` | Slack 署名               | Slack ボタン操作の受け口                      |
+
+メニュー一覧はmicroCMSをFEがビルド時に取得するため、本APIにエンドポイントを持ちません。
 
 ---
 
@@ -88,55 +109,75 @@ src/
 ### 1. 依存関係のインストール
 
 ```bash
-npm install
+pnpm install
 ```
 
-### 2. LINE Developers Console の設定
+### 2. 環境変数の設定
 
-1. [LINE Developers Console](https://developers.line.biz/console/) で LINE Login チャネルを作成
-2. スコープに `profile` と `openid` を有効化
-
-### 3. 環境変数の設定
-
-ローカル開発用に `wrangler.dev.toml` を作成し、値を設定します（`.gitignore` 済み）。
-
-```toml
-[vars]
-LINE_CHANNEL_ID = "あなたのチャネルID"
-LINE_CHANNEL_SECRET = "あなたのチャネルシークレット"
-FRONTEND_URL = "http://localhost:3000"
-SESSION_SECRET = "任意の強い文字列"
-```
-
-本番環境のシークレットは CLI で登録します。
+ローカルはテンプレートをコピーして値を埋めます（`wrangler.dev.toml` は `.gitignore` 済み）。`wrangler dev` は `wrangler secret put` を読まないため、シークレットもこのファイルの `[vars]` に置きます。
 
 ```bash
-npx wrangler secret put LINE_CHANNEL_SECRET
-npx wrangler secret put SESSION_SECRET
+cp wrangler.dev.toml.example wrangler.dev.toml
 ```
 
-### 4. 開発コマンド
+本番は `wrangler secret put` で設定します。各変数の意味・一覧は仕様リポジトリ `line-order-document`（`_llm-docs/spec/backend/`）を参照してください。
+
+### 3. 開発コマンド
 
 ```bash
-# 開発サーバーの起動
-npm run dev
-
-# フォーマット
-npx biome format --write src/
-
-# リント
-npm run lint
-
-# 本番デプロイ
-npm run deploy
+pnpm dev      # 開発サーバー
+pnpm format   # 整形（TS + md）
+pnpm lint     # Lint（TS）
+pnpm deploy   # 本番デプロイ
 ```
 
 ---
 
 ## ドキュメント
 
-詳細は `document/` 配下を参照してください。
+仕様の正本は別リポジトリ `line-order-document` で管理しています。`_llm-docs/spec/backend/` を参照してください。
 
-- [architecture.md](document/architecture.md) - アーキテクチャ・KV データ構造・FE 実装例
-- [security.md](document/security.md) - セキュリティ対策・環境変数管理
-- [command.md](document/command.md) - 開発コマンド一覧
+
+### Git Subtreeによる\_documentディレクトリの管理
+
+このプロジェクトでは、`_document/`ディレクトリを[line-order-document](https://github.com/webdev-jp-net/line-order-document)リポジトリからGit Subtreeで取り込んでいます。
+
+#### 利用可能なGitエイリアス
+
+| エイリアス | コマンド                                                                                                 | 説明                                                          |
+| ---------- | -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `doc-pull` | `git subtree pull --prefix=_document git@github.com:webdev-jp-net/line-order-document.git develop --squash` | documentリポジトリの最新内容を取り込む（developブランチから） |
+| `doc-push` | `git subtree push --prefix=_document git@github.com:webdev-jp-net/line-order-document.git develop`          | \_document配下の変更をdocumentリポジトリにプッシュ            |
+
+#### 開発フロー
+
+1. **作業開始時は必ず最新の仕様を取り込む**
+
+   ```bash
+   # 作業開始前に必ず実行
+   git doc-pull
+   ```
+
+2. **仕様書を編集した場合**
+   ```bash
+   # 変更をコミット後
+   git doc-push
+   ```
+
+⚠️ **重要**: 作業開始時の`doc-pull`を忘れると、古い仕様に基づいた実装や、他の開発者との変更が衝突する可能性があります。
+
+#### 使用方法
+
+```bash
+# documentリポジトリから最新の変更を取り込む
+git doc-pull
+
+# _document配下の変更をdocumentリポジトリにプッシュする
+git doc-push
+```
+
+#### 注意事項
+
+- `develop`ブランチで実行します
+- 作業開始前に必ず`doc-pull`で最新の仕様書を取り寄せてください
+- `_document/`配下のファイルを編集した場合は、プルリクエストのMergeが完了し解決したタイミングで`doc-push`してください
