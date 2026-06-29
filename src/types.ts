@@ -47,6 +47,8 @@ export type OrderItem = {
 	// メニュー名。microCMS は FE がビルド時に取得するため、FE が注文時に渡す。
 	name: string;
 	qty: number;
+	// 単価（円）。FE が注文時に渡す。
+	price: number;
 };
 
 // KV に保存する注文（Key: order:{userId}:{orderId}）

@@ -63,8 +63,11 @@ const NEXT_ACTION: Partial<
 
 /** 注文内容の表示テキスト */
 const orderSummary = (order: Order): string => {
-	const items = order.orderList.map((i) => `・${i.name} x${i.qty}`).join("\n");
-	return `注文ID: ${order.orderId}\nユーザー: ${order.name}\n${items}`;
+	const items = order.orderList
+		.map((i) => `・${i.name} x${i.qty} ¥${i.price.toLocaleString()}`)
+		.join("\n");
+	const total = order.orderList.reduce((sum, i) => sum + i.price * i.qty, 0);
+	return `注文ID: ${order.orderId}\nユーザー: ${order.name}\n${items}\n合計: ¥${total.toLocaleString()}`;
 };
 
 /** 注文の現在状態に応じた Block Kit ブロックを組み立てる */

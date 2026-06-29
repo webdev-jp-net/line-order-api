@@ -1,7 +1,7 @@
 import type { LineIdTokenPayload } from "../types";
 
 const LINE_VERIFY_URL = "https://api.line.me/oauth2/v2.1/verify";
-const LINE_TOKEN_URL = "https://api.line.me/oauth2/v2.3/token";
+const LINE_TOKEN_URL = "https://api.line.me/oauth2/v3/token";
 const LINE_NOTIFIER_TOKEN_URL = "https://api.line.me/message/v3/notifier/token";
 const LINE_NOTIFIER_SEND_URL =
 	"https://api.line.me/message/v3/notifier/send?target=service";

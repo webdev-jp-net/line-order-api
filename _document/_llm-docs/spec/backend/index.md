@@ -36,15 +36,15 @@ sequenceDiagram
 `open → done → closed`
 
 | slug     | 日本語   | 操作（Slack ボタン）   | ユーザーへの LINE 通知 |
-| -------- | -------- | ---------------------- | -------------------- |
-| `open`   | 注文受付 | （注文作成時の初期値） | 送る（注文受付）     |
-| `done`   | 準備完了 | 準備完了               | 送る                 |
-| `closed` | 受渡完了 | 受渡完了               | -                    |
+| -------- | -------- | ---------------------- | ---------------------- |
+| `open`   | 注文受付 | （注文作成時の初期値） | 送る（注文受付）       |
+| `done`   | 準備完了 | 準備完了               | 送る                   |
+| `closed` | 受渡完了 | 受渡完了               | -                      |
 
 ## メニュー
 
 メニューはmicroCMSで管理し、フロントエンドがビルド時に取得して表示します。APIはメニューを保持せず、メニュー取得エンドポイントも持ちません。
-注文時はフロントエンドが各明細にメニュー名（`name`）を含めて送り、Slack通知・注文履歴の表示に使います。支払いは対面のため、サーバ側で価格検証は行いません。
+注文時はフロントエンドが各明細にメニュー名（`name`）と価格（`price`）を含めて送り、Slack通知・注文履歴の表示に使います。支払いは対面のため、サーバ側で価格の妥当性検証は行いません。
 
 ## API 仕様
 
@@ -75,14 +75,14 @@ sequenceDiagram
 
 ```json
 {
-  "orderList": [{ "productId": "<microCMS id>", "name": "タコス", "qty": 2 }],
+  "orderList": [{ "productId": "<microCMS id>", "name": "タコス", "qty": 2, "price": 480 }],
   "liffAccessToken": "..."
 }
 ```
 
 処理:
 
-1. 注文内容を検証します（`productId`・`name` が文字列、`qty` が1以上の整数）
+1. 注文内容を検証します（`productId`・`name` が文字列、`qty` が1以上の整数、`price` が0以上の数値）
 2. サービス通知トークンを発行します（`liffAccessToken` を入力）
 3. 注文をKVに保存します（`status: open`、表示名はJWTから取得）
 4. 注文受付のサービスメッセージをユーザーへ送信します（自動）
@@ -98,7 +98,12 @@ sequenceDiagram
 ```json
 {
   "orderList": [
-    { "orderId": "ord_001", "status": "done", "orderList": [], "createdAt": "..." }
+    {
+      "orderId": "ord_001",
+      "status": "done",
+      "orderList": [{ "productId": "<microCMS id>", "name": "タコス", "qty": 2, "price": 480 }],
+      "createdAt": "..."
+    }
   ]
 }
 ```
@@ -137,10 +142,10 @@ Slackボタン押下を受けます。`application/x-www-form-urlencoded` の `p
 
 テンプレートと `params` の対応:
 
-| 通知 | テンプレート（env） | `params` |
-| --- | --- | --- |
-| 注文受付（open・自動） | `order_request_d_o_ja`（`LINE_TEMPLATE_OPEN`） | `number`=orderId / `order_detail`=明細 / `how_to_receive`=固定文 / `btn1_url` |
-| 準備完了（done・Slack操作） | `order_comp_d_o_ja`（`LINE_TEMPLATE_DONE`） | `number`=orderId / `order_detail`=明細 / `content`=固定文 / `btn1_url` |
+| 通知                        | テンプレート（env）                            | `params`                                                                      |
+| --------------------------- | ---------------------------------------------- | ----------------------------------------------------------------------------- |
+| 注文受付（open・自動）      | `order_request_d_o_ja`（`LINE_TEMPLATE_OPEN`） | `number`=orderId / `order_detail`=明細 / `how_to_receive`=固定文 / `btn1_url` |
+| 準備完了（done・Slack操作） | `order_comp_d_o_ja`（`LINE_TEMPLATE_DONE`）    | `number`=orderId / `order_detail`=明細 / `content`=固定文 / `btn1_url`        |
 
 `order_detail` は明細（`name × qty`）を改行区切りで生成します。`btn1_url` はボタンURLで、`FRONTEND_URL` を使います。テンプレートのボタンは省略できない（ボタンなしテンプレートが用意できない）ため、有効なURLを必ず渡します。
 
@@ -149,6 +154,7 @@ Slackボタン押下を受けます。`application/x-www-form-urlencoded` の `p
 ### 新規注文通知
 
 - `chat.postMessage`（`SLACK_BOT_TOKEN`）で `SLACK_CHANNEL_ID` に投稿します
+- 明細に各メニューの価格を表示し、合計金額（`price × qty` の総和）を併記します（対面決済の徴収額確認に使います）
 - Block Kitで、現在状態に対する「次の操作」ボタンを1つ表示します（線形フロー）
 - ボタンの `value` に `{ userId, orderId, status }` を載せます
 
