@@ -1,7 +1,0 @@
-name = "line-order-api"
-main = "src/index.ts"
-workers_dev = true
-compatibility_date = "2026-03-05"
-kv_namespaces = [
-  { binding = "KV", id = "REPLACE_WITH_OWN_KV_NAMESPACE_ID" }
-]
