@@ -154,6 +154,7 @@ Slackボタン押下を受けます。`application/x-www-form-urlencoded` の `p
 ### 新規注文通知
 
 - `chat.postMessage`（`SLACK_BOT_TOKEN`）で `SLACK_CHANNEL_ID` に投稿します
+- 明細に各メニューの価格を表示し、合計金額（`price × qty` の総和）を併記します（対面決済の徴収額確認に使います）
 - Block Kitで、現在状態に対する「次の操作」ボタンを1つ表示します（線形フロー）
 - ボタンの `value` に `{ userId, orderId, status }` を載せます
 
