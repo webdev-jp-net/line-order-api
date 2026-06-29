@@ -23,7 +23,9 @@ const isValidOrderList = (list: unknown): list is OrderItem[] =>
 			typeof i?.name === "string" &&
 			i.name.length > 0 &&
 			Number.isInteger(i?.qty) &&
-			i.qty > 0,
+			i.qty > 0 &&
+			typeof i?.price === "number" &&
+			i.price >= 0,
 	);
 
 /**
