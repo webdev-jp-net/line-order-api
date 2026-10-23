@@ -15,10 +15,10 @@
 	},
 	"license": "ISC",
 	"devDependencies": {
-		"@biomejs/biome": "2.5.0",
-		"@cloudflare/workers-types": "^4.20241218.0",
-		"@types/node": "^22.10.5",
-		"textlint": "^15.7.1",
+		"@biomejs/biome": "2.6.2",
+		"@cloudflare/workers-types": "^5.20261021.1",
+		"@types/node": "^26.6.5",
+		"textlint": "^15.8.0",
 		"textlint-rule-preset-jtf-style": "^3.0.3",
 		"tsconfig-paths": "^4.2.0"
 	},
@@ -30,8 +30,8 @@
 		}
 	},
 	"dependencies": {
-		"hono": "^4.12.26",
-		"typescript": "^6.0.3",
-		"wrangler": "^4.103.0"
+		"hono": "^4.13.13",
+		"typescript": "^7.0.2",
+		"wrangler": "^4.151.3"
 	}
 }
