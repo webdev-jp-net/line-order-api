@@ -55,7 +55,7 @@ JWTはステートレスなため、KVへのセッション問い合わせが不
 
 ### 6. リクエストバリデーション
 
-`POST /orders` では注文内容（`orderList` の `productId`・`qty`）を検証します。不正な値がある場合は400 Bad Requestと `errorParams` で不正フィールド名を返します。
+`POST /orders` では注文内容（`orderList` の `productId`・`name`・`qty`・`price`）を検証します。不正な値がある場合は400 Bad Requestと `errorParams` で不正フィールド名を返します。
 
 > 決済はオンラインで行わず、メニュー受け渡し時に対面で行うため、本 API は決済情報を扱いません。
 
@@ -70,9 +70,9 @@ JWTはステートレスなため、KVへのセッション問い合わせが不
 | `SLACK_BOT_TOKEN`           | Slack への通知投稿に使用                       |
 | `SLACK_SIGNING_SECRET`      | Slack リクエストの署名検証に使用               |
 
-### デプロイ設定（`wrangler.toml` に置かない値）
+### デプロイ設定（`wrangler.toml` の `[vars]` で設定）
 
-以下の識別子は `wrangler.toml` に置かず、本番は `wrangler secret put`、ローカルは `wrangler.dev.toml` の `[vars]` で設定します。
+以下の非秘匿の設定値は、本番は `wrangler.toml` の `[vars]`、ローカルは `wrangler.dev.toml` の `[vars]` で設定します。いずれも認証情報ではないため、`wrangler.toml` に記載してリポジトリで管理します。
 
 | 変数名                   | 説明                                                      |
 | ------------------------ | --------------------------------------------------------- |
@@ -88,4 +88,6 @@ JWTはステートレスなため、KVへのセッション問い合わせが不
 - [サービスメッセージを送信する](https://developers.line.biz/ja/docs/line-mini-app/develop/service-messages/)
 - [Slack | Verifying requests from Slack](https://api.slack.com/authentication/verifying-requests-from-slack)
 - [Cloudflare Workers Secrets](https://developers.cloudflare.com/workers/configuration/secrets/)
+- [Cloudflare Workers Environment variables](https://developers.cloudflare.com/workers/configuration/environment-variables/)
+- [Cloudflare KV namespaces](https://developers.cloudflare.com/kv/concepts/kv-namespaces/)
 - [Hono JWT Middleware](https://hono.dev/docs/helpers/jwt)

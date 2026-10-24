@@ -38,3 +38,9 @@ LINE ミニアプリ (LIFF + React)
 
 - [仕様](spec/index.md) - バックエンド・ユーザーアプリの仕様索引
 - [用語集](operation/dictionary.md) - 用語の正本
+- [UI 表記規約](operation/naming-ui-ux.md) - UI文言・仕様書・コミットメッセージを含む日本語テキストの表記
+- [コンポーネント生成ガイド](operation/generate-component.md) - ユーザーアプリのscaffdogによる雛形生成
+- 外部サービスの設定・デプロイ手順
+  - [Cloudflare デプロイ設定](operation/cloudflare.md) - KV・環境変数・デプロイ・ローカル開発
+  - [LINEミニアプリ設定](operation/line-miniapp.md) - チャネル・LIFFアプリ・チャネル整合
+  - [Slack アプリ設定](operation/slack-api.md) - 権限・投稿先チャンネル・署名シークレット・ボタン操作

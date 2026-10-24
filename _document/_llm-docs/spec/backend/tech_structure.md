@@ -21,14 +21,14 @@ LIFFのID Tokenをサーバで検証し、自前JWTを発行してBearerで認�
 | `SESSION_SECRET`            | secret | JWT 署名キー                             |
 | `LINE_CHANNEL_ID`           | 設定   | ID Token の aud 検証                      |
 | `LINE_CHANNEL_SECRET` | secret | チャネルアクセストークンのステートレス発行（サービス通知トークン発行・サービスメッセージ送信に使用） |
-| `FRONTEND_URL`              | 設定   | CORS 許可オリジン                        |
+| `FRONTEND_URL`              | 設定   | CORS 許可オリジン・サービスメッセージのボタン URL |
 | `SLACK_BOT_TOKEN`           | secret | Slack 投稿                               |
 | `SLACK_SIGNING_SECRET`      | secret | Slack 署名検証                           |
 | `SLACK_CHANNEL_ID`          | 設定   | 新規注文の投稿先チャンネル               |
 | `LINE_TEMPLATE_OPEN`    | 設定   | 注文受付通知の API 用テンプレート名      |
 | `LINE_TEMPLATE_DONE`        | 設定   | 準備完了通知の API 用テンプレート名      |
 
-設定値も含め、本番は `wrangler secret put`、ローカルは `wrangler.dev.toml` の `[vars]` で設定します。
+本番は、secretを `wrangler secret put`、設定を `wrangler.toml` の `[vars]` で設定します。ローカルはどちらも `wrangler.dev.toml` の `[vars]` で設定します。
 
 ## 非機能要件・制約
 
