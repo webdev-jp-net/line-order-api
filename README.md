@@ -170,7 +170,7 @@ git subtree add --prefix=_document git@github.com:webdev-jp-net/line-order-docum
 
 2. **仕様書を編集した場合**
    ```bash
-   # 変更をコミット後
+   # プルリクエストのMerge完了後、developで実行
    git doc-push
    ```
 
