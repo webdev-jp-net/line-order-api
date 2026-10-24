@@ -6,7 +6,7 @@ line-order-apiをCloudflare Workersにデプロイする手順です。KVネー�
 
 設定ファイルは2つです。
 
-- `wrangler.toml`: 本番用。KV idと非秘匿の設定値を記載し、リポジトリで管理します（KV namespace IDは公開されている値で、認証情報ではありません）
+- `wrangler.toml`: 本番用。KV idと非秘匿の設定値を記載し、リポジトリで管理します
 - `wrangler.dev.toml`: ローカル開発用。シークレットも置くため .gitignore済みで、`wrangler.dev.toml.example` から作成します
 
 ## ログイン
@@ -25,7 +25,7 @@ pnpm wrangler login
 # 本番用（出力に id が返る）
 pnpm wrangler kv namespace create KV
 
-# ローカル dev のオーバーレイ用
+# wrangler dev 用（preview_id）
 pnpm wrangler kv namespace create KV --preview
 ```
 
@@ -36,7 +36,7 @@ pnpm wrangler kv namespace create KV --preview
 
 作成済みネームスペースの一覧は `pnpm wrangler kv namespace list` で確認できます。
 
-`wrangler dev` はローカル（Miniflare）で動くためKVの実体は `.wrangler/state/` 配下のローカルファイルです。`id` / `preview_id` はローカルでは識別子として使われるだけですが、`--remote` で実KVに繋ぐ場合にそのまま使えるよう実IDを入れておきます。
+`wrangler dev` はローカル（Miniflare）で動くためKVの実体は `.wrangler/state/` 配下のローカルファイルです。
 
 ローカルKVへのデータ投入:
 
@@ -60,16 +60,7 @@ pnpm wrangler kv key put --binding KV "key" "value" --local --config wrangler.de
 | `LINE_TEMPLATE_OPEN` | 注文受付の通知テンプレート名（`{name}_{BCP47}`、30文字以内）  |
 | `LINE_TEMPLATE_DONE` | 準備完了の通知テンプレート名（`{name}_{BCP47}`、30文字以内）  |
 
-`wrangler.toml` に直接書き、リポジトリで管理します。いずれも認証情報ではありません。
-
-```toml
-[vars]
-FRONTEND_URL = "https://example.vercel.app"
-LINE_CHANNEL_ID = "1234567890"
-SLACK_CHANNEL_ID = "C00000000"
-LINE_TEMPLATE_OPEN = "order_request_ja"
-LINE_TEMPLATE_DONE = "order_comp_ja"
-```
+`wrangler.toml` に直接書き、リポジトリで管理します。現在の値は `wrangler.toml` を参照します。
 
 ### 秘匿（`wrangler secret put`）
 
@@ -113,3 +104,12 @@ pnpm dev
 ```
 
 `wrangler dev --config wrangler.dev.toml` が `http://localhost:8787` で起動します。ローカルではシークレットも `wrangler.dev.toml` の `[vars]` に置きます（`wrangler dev` は `wrangler secret put` の値を読まないため）。テンプレートは `wrangler.dev.toml.example` を参照します。
+
+## リファレンス
+
+- [Cloudflare KV namespaces](https://developers.cloudflare.com/kv/concepts/kv-namespaces/)
+- [Cloudflare Workers Environment variables](https://developers.cloudflare.com/workers/configuration/environment-variables/)
+- [Cloudflare Workers Secrets](https://developers.cloudflare.com/workers/configuration/secrets/)
+- [Wrangler commands（Workers）](https://developers.cloudflare.com/workers/wrangler/commands/workers/)
+- [Cloudflare Workers Local data](https://developers.cloudflare.com/workers/development-testing/local-data/)
+- [pnpm run](https://pnpm.io/cli/run)

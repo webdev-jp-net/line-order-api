@@ -1,7 +1,7 @@
 # LINE Order API
 
 LIFF + Cloudflare Workers + KVを使用した注文受付APIです。
-LINEミニアプリから注文を受け、Slackで運営に通知し、準備完了時にLINEサービスメッセージで注文者へ知らせます。
+LINEミニアプリから注文を受け、Slackで運営に通知し、注文受付時と準備完了時にLINEサービスメッセージで注文者へ知らせます。
 認証はLIFFのID Tokenをサーバーで検証し、JWTを発行して行います。
 
 ## 技術スタック
@@ -25,7 +25,7 @@ LINEミニアプリから注文を受け、Slackで運営に通知し、準備�
 ### 外部サービス
 
 - **LINE Login v2.1 / LIFF SDK** - ログイン・ID Token / アクセストークン取得
-- **LINE MINI App サービスメッセージ** - 準備完了通知
+- **LINE MINI App サービスメッセージ** - 注文受付・準備完了通知
 - **microCMS** - メニューマスター（FEがビルド時に取得）
 - **Slack** - 運営への新規注文通知・状態更新操作
 
@@ -50,12 +50,14 @@ sequenceDiagram
     Worker->>LINE: POST /message/v3/notifier/token
     LINE-->>Worker: serviceNotificationToken
     Worker->>KV: order:{userId}:{orderId} 保存
+    Worker->>LINE: POST /message/v3/notifier/send (注文受付)
+    LINE-->>User: サービスメッセージ（注文受付）
     Worker->>Slack: 新規注文を通知
     Note over Slack: 運営がボタン操作
     Slack->>Worker: POST /slack/interactions
     Worker->>KV: status 更新
-    Worker->>LINE: POST /message/v3/notifier/send (progress / done 時)
-    LINE-->>User: サービスメッセージ
+    Worker->>LINE: POST /message/v3/notifier/send (done 時)
+    LINE-->>User: サービスメッセージ（準備完了）
 ```
 
 ---
@@ -128,7 +130,7 @@ cp wrangler.dev.toml.example wrangler.dev.toml
 pnpm dev      # 開発サーバー
 pnpm format   # 整形（TS + md）
 pnpm lint     # Lint（TS）
-pnpm run deploy   # 本番デプロイ（`pnpm deploy` は pnpm 組み込みコマンドと衝突）
+pnpm run deploy   # 本番デプロイ
 ```
 
 ---

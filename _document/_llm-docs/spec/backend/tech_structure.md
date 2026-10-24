@@ -21,7 +21,7 @@ LIFFのID Tokenをサーバで検証し、自前JWTを発行してBearerで認�
 | `SESSION_SECRET`            | secret | JWT 署名キー                             |
 | `LINE_CHANNEL_ID`           | 設定   | ID Token の aud 検証                      |
 | `LINE_CHANNEL_SECRET` | secret | チャネルアクセストークンのステートレス発行（サービス通知トークン発行・サービスメッセージ送信に使用） |
-| `FRONTEND_URL`              | 設定   | CORS 許可オリジン                        |
+| `FRONTEND_URL`              | 設定   | CORS 許可オリジン・サービスメッセージのボタン URL |
 | `SLACK_BOT_TOKEN`           | secret | Slack 投稿                               |
 | `SLACK_SIGNING_SECRET`      | secret | Slack 署名検証                           |
 | `SLACK_CHANNEL_ID`          | 設定   | 新規注文の投稿先チャンネル               |
