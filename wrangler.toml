@@ -1,0 +1,16 @@
+name = "line-order-api"
+main = "src/index.ts"
+workers_dev = true
+compatibility_date = "2026-03-05"
+kv_namespaces = [
+  { binding = "KV", id = "187953320b62467fa8bee73b213a9bdd" }
+]
+
+# 非秘匿の環境変数。秘匿値（LINE_CHANNEL_SECRET / SESSION_SECRET /
+# SLACK_BOT_TOKEN / SLACK_SIGNING_SECRET）は wrangler secret put で登録する。
+[vars]
+FRONTEND_URL = "https://line-order-app-pi.vercel.app"
+LINE_CHANNEL_ID = "2010482009"
+SLACK_CHANNEL_ID = "C0BEMLZ3VA4"
+LINE_TEMPLATE_OPEN = "order_request_d_o_ja"
+LINE_TEMPLATE_DONE = "order_comp_d_o_ja"
