@@ -120,7 +120,7 @@ pnpm install
 cp wrangler.dev.toml.example wrangler.dev.toml
 ```
 
-本番は `wrangler secret put` で設定します。各変数の意味・一覧は仕様リポジトリ `line-order-document`（`_llm-docs/spec/backend/`）を参照してください。
+本番は、設定値を `wrangler.toml` の `[vars]`（リポジトリで管理）、シークレットを `wrangler secret put` で設定します。デプロイ手順は `_llm-docs/operation/cloudflare.md`、各変数の意味・一覧は `_llm-docs/spec/backend/` を参照してください（仕様リポジトリ `line-order-document`）。
 
 ### 3. 開発コマンド
 
@@ -128,7 +128,7 @@ cp wrangler.dev.toml.example wrangler.dev.toml
 pnpm dev      # 開発サーバー
 pnpm format   # 整形（TS + md）
 pnpm lint     # Lint（TS）
-pnpm deploy   # 本番デプロイ
+pnpm run deploy   # 本番デプロイ（`pnpm deploy` は pnpm 組み込みコマンドと衝突）
 ```
 
 ---

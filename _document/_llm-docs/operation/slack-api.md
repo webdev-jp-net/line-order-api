@@ -43,4 +43,4 @@ Request URLに入れる値:
 | チャンネルID（`C`）             | `SLACK_CHANNEL_ID`     |
 | Signing Secret                  | `SLACK_SIGNING_SECRET` |
 
-本番は `wrangler secret put`、ローカルは `wrangler.dev.toml` に設定します（値は公開リポジトリに含めません）。
+本番は `SLACK_BOT_TOKEN`・`SLACK_SIGNING_SECRET` を `wrangler secret put`、`SLACK_CHANNEL_ID` を `wrangler.toml` の `[vars]` に設定します。ローカルは `wrangler.dev.toml` に設定します（シークレットの値は公開リポジトリに含めません）。

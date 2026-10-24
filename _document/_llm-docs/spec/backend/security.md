@@ -70,9 +70,9 @@ JWTはステートレスなため、KVへのセッション問い合わせが不
 | `SLACK_BOT_TOKEN`           | Slack への通知投稿に使用                       |
 | `SLACK_SIGNING_SECRET`      | Slack リクエストの署名検証に使用               |
 
-### デプロイ設定（`wrangler.toml` に置かない値）
+### デプロイ設定（`wrangler.toml` の `[vars]` で設定）
 
-以下の識別子は `wrangler.toml` に置かず、本番は `wrangler secret put`、ローカルは `wrangler.dev.toml` の `[vars]` で設定します。
+以下の非秘匿の設定値は、本番は `wrangler.toml` の `[vars]`、ローカルは `wrangler.dev.toml` の `[vars]` で設定します。いずれも認証情報ではないため、`wrangler.toml` に記載してリポジトリで管理します。
 
 | 変数名                   | 説明                                                      |
 | ------------------------ | --------------------------------------------------------- |

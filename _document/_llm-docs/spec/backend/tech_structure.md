@@ -28,7 +28,7 @@ LIFFのID Tokenをサーバで検証し、自前JWTを発行してBearerで認�
 | `LINE_TEMPLATE_OPEN`    | 設定   | 注文受付通知の API 用テンプレート名      |
 | `LINE_TEMPLATE_DONE`        | 設定   | 準備完了通知の API 用テンプレート名      |
 
-設定値も含め、本番は `wrangler secret put`、ローカルは `wrangler.dev.toml` の `[vars]` で設定します。
+本番は、secretを `wrangler secret put`、設定を `wrangler.toml` の `[vars]` で設定します。ローカルはどちらも `wrangler.dev.toml` の `[vars]` で設定します。
 
 ## 非機能要件・制約
 

@@ -4,12 +4,10 @@
 
 line-order-apiをCloudflare Workersにデプロイする手順です。KVネームスペースの作成、環境変数の設定、デプロイまでを扱います。
 
-設定ファイルは2層構成です。
+設定ファイルは2つです。
 
-- `wrangler.toml.example`: 追跡対象のテンプレート（プレースホルダ）
-- `wrangler.toml`: 実値を入れるローカル専用。実KV idと設定値を含むため .gitignore済み
-
-`cp wrangler.toml.example wrangler.toml` してから値を埋めます。
+- `wrangler.toml`: 本番用。KV idと非秘匿の設定値を記載し、リポジトリで管理します（KV namespace IDは公開されている値で、認証情報ではありません）
+- `wrangler.dev.toml`: ローカル開発用。シークレットも置くため .gitignore済みで、`wrangler.dev.toml.example` から作成します
 
 ## ログイン
 
@@ -33,7 +31,7 @@ pnpm wrangler kv namespace create KV --preview
 
 出力されたIDをtomlに転記します。
 
-- 本番用 `id` → `wrangler.toml` の `kv_namespaces` の `id`（`REPLACE_WITH_OWN_KV_NAMESPACE_ID` を置換）
+- 本番用 `id` → `wrangler.toml` の `kv_namespaces` の `id`
 - 本番用 `id` ＋ preview用 `preview_id` → `wrangler.dev.toml` の `kv_namespaces`
 
 作成済みネームスペースの一覧は `pnpm wrangler kv namespace list` で確認できます。
@@ -43,8 +41,10 @@ pnpm wrangler kv namespace create KV --preview
 ローカルKVへのデータ投入:
 
 ```bash
-pnpm wrangler kv key put --binding KV "key" "value" --local
+pnpm wrangler kv key put --binding KV "key" "value" --local --config wrangler.dev.toml --preview
 ```
+
+`wrangler dev` は `preview_id` のネームスペースを使います。`--config wrangler.dev.toml --preview` を付けないと、`pnpm dev` から見えないネームスペースへ書き込まれます。
 
 ## 環境変数の設定
 
@@ -60,7 +60,7 @@ pnpm wrangler kv key put --binding KV "key" "value" --local
 | `LINE_TEMPLATE_OPEN` | 注文受付の通知テンプレート名（`{name}_{BCP47}`、30文字以内）  |
 | `LINE_TEMPLATE_DONE` | 準備完了の通知テンプレート名（`{name}_{BCP47}`、30文字以内）  |
 
-`wrangler.toml` に直接書きます。
+`wrangler.toml` に直接書き、リポジトリで管理します。いずれも認証情報ではありません。
 
 ```toml
 [vars]
@@ -80,7 +80,7 @@ LINE_TEMPLATE_DONE = "order_comp_ja"
 | `SLACK_BOT_TOKEN`      | Slack の Bot User OAuth Token（`xoxb-`）                  |
 | `SLACK_SIGNING_SECRET` | Slack の Signing Secret                                   |
 
-平文でファイルに残さないため、暗号化保存されるsecretで登録します。Workerが存在してから（初回デプロイ後）登録できます。
+平文でファイルに残さないため、暗号化保存されるsecretで登録します。初回は、デプロイでWorkerを作成した後に登録します。
 
 ```bash
 pnpm wrangler secret put LINE_CHANNEL_SECRET
