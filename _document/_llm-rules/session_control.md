@@ -156,7 +156,6 @@ alwaysApply: true
   → 注意: ドキュメント更新の完了を確認後にPR作成
 
 - **ページコンポーネント生成（scaffdog使用）**
-  → ページコンポーネント生成カテゴリのルールを適用
   → 詳細: `_llm-docs/operation/generate-component.md`参照
 
 - **要件定義書作成（詳細設計からの抽出）**

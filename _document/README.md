@@ -69,10 +69,17 @@ _llm-docs/            # プロジェクト仕様書
 │   │   ├── db_structure.md   # データ設計（Cloudflare KV）
 │   │   └── security.md       # セキュリティ対策・環境変数管理
 │   └── user-app/         # ユーザーアプリ仕様
-│       └── index.md
-└── operation/        # 運用・用語
+│       ├── index.md          # 機能仕様
+│       ├── line-auth.md      # LINE認証
+│       ├── menu.md           # メニュー（microCMS）
+│       └── style.md          # スタイリング方針
+└── operation/        # 運用・用語・設定手順
     ├── dictionary.md     # 用語集（正本）
-    └── generate-component.md  # コンポーネント生成ガイド
+    ├── naming-ui-ux.md   # UI 表記規約
+    ├── generate-component.md  # コンポーネント生成ガイド
+    ├── cloudflare.md     # Cloudflare デプロイ設定
+    ├── line-miniapp.md   # LINEミニアプリ設定
+    └── slack-api.md      # Slack アプリ設定
 ```
 
 ## 更新時の注意
